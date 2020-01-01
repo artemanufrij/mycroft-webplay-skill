@@ -1,0 +1,1 @@
+.*(spiele das album) (?P<AlbumTitle>.+)
