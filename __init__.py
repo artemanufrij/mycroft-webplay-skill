@@ -9,6 +9,7 @@ from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.util import get_cache_directory
 from mycroft.util.parse import match_one
 
+
 class Webplay(CommonPlaySkill):
     def __init__(self):
         super().__init__(name="WebplaySkill")
@@ -27,7 +28,7 @@ class Webplay(CommonPlaySkill):
     def handle_random_play(self, message):
         self.now_playing = True
         self.speak_dialog("random")
-        url = "https://wiki.anufrij.de/api/track/5e0b843a95a6e4c6b25d40a8/stream/128"
+        url = "http://localhost:31204/api/album/teststring"
         mime = 'audio/mpeg'
 
         if os.path.exists(self.STREAM):
@@ -35,7 +36,8 @@ class Webplay(CommonPlaySkill):
         os.mkfifo(self.STREAM)
 
         self.log.debug('Running curl {}'.format(url))
-        args = ['curl', '-L', quote(url, safe=":/"), '-o', self.STREAM]
+        args = ['curl', '--data', '--data "param1=value1&param2=value2"',
+                '-L', quote(url, safe=":/"), '-o', self.STREAM]
         self.curl = subprocess.Popen(args)
 
         wait_while_speaking()
