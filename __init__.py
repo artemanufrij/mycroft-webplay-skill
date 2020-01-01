@@ -9,8 +9,6 @@ from urllib.parse import quote
 from mycroft import intent_file_handler, intent_handler
 from mycroft.audio import wait_while_speaking
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
-from mycroft.util import get_cache_directory
-from mycroft.util.parse import match_one
 
 mime = 'audio/mpeg'
 host = "http://localhost:31204/"
@@ -19,9 +17,6 @@ host = "http://localhost:31204/"
 class Webplay(CommonPlaySkill):
     def __init__(self):
         super().__init__(name="WebplaySkill")
-        self.curl = None
-        self.now_playing = None
-        self.STREAM = '{}/stream'.format(get_cache_directory('WebplaySkill'))
 
     def CPS_match_query_phrase(self, phrase):
         return None
@@ -48,26 +43,26 @@ class Webplay(CommonPlaySkill):
         r = requests.get(url)
         try:
             response = r.json()
-            track_id = response["tracks"][0]["_id"]
-            self.play_track_id(track_id)
+            self.play_tracks(response)
+
         except:
             self.speak_dialog("nothing.found")
 
-    def play_track_id(self, id):
+    def play_track(self, id):
         url = host + "api/track/" + id + "/stream/128"
-        print(url)
-
-        #if os.path.exists(self.STREAM):
-        #    os.remove(self.STREAM)
-        #os.mkfifo(self.STREAM)
-
-        #args = ['curl',
-        #        '-L', quote(url, safe=":/"), '-o', self.STREAM]
-        #self.curl = subprocess.Popen(args)
-
         wait_while_speaking()
-        # self.CPS_play(('file://' + self.STREAM, mime))
         self.audioservice.play(url)
+
+    def play_tracks(self, parent):
+        tracks = []
+        for track in parent["tracks"]:
+            tracks.append(host + "api/track/" + track["_id"] + "/stream/128")
+
+        self.audioservice.play(tracks)
+
+    @intent_file_handler('NextTrack.intent')
+    def next_track(self):
+        self.audioservice.next()
 
 
 def create_skill():
