@@ -10,7 +10,6 @@ from mycroft import intent_file_handler, intent_handler
 from mycroft.audio import wait_while_speaking
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 
-mime = 'audio/mpeg'
 host = "http://localhost:31204/"
 
 
