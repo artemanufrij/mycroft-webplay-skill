@@ -24,16 +24,23 @@ class Webplay(CommonPlaySkill):
         url = data['track']
         self.audioservice.play(url)
 
-    @intent_file_handler('Stop.intent')
-    def handle_stop_playing(self, message):
-        self.stop()
-
     @intent_file_handler('Random.intent')
     def handle_random_play(self, message):
         self.speak_dialog("random")
 
-    @intent_handler(IntentBuilder("").require("Album").
-                    require("AlbumTitle"))
+    @intent_file_handler('Radio.intent')
+    def handle_radio_play(self, message):
+        self.speak_dialog("random")
+        url = host + "api/radio/"
+        r = requests.get(url)
+        try:
+            response = r.json()
+            self.play_tracks(response)
+
+        except:
+            self.speak_dialog("nothing.found")
+
+    @intent_handler(IntentBuilder("").require("Album").require("AlbumTitle"))
     def handler_album_play(self, message):
         self.speak_dialog("album")
         url = host + "api/album/" + \
@@ -56,11 +63,15 @@ class Webplay(CommonPlaySkill):
         tracks = []
         for track in parent["tracks"]:
             tracks.append(host + "api/track/" + track["_id"] + "/stream/128")
-
+        wait_while_speaking()
         self.audioservice.play(tracks)
 
+    @intent_file_handler('Stop.intent')
+    def handle_stop_playing(self, message):
+        self.stop()
+
     @intent_file_handler('NextTrack.intent')
-    def next_track(self):
+    def next_track(self, message):
         self.audioservice.next()
 
 
